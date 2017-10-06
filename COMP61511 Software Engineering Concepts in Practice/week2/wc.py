@@ -1,4 +1,4 @@
-OUTPUT = "{}\t{}\t{}\t{}"
+OUTPUT = "\t{}\t{}\t{}\t{}"
 FNF_ERR = "wc: {}: No such file or directory"
 
 def processFile(filepath):
