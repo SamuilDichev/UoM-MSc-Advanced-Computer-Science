@@ -1,7 +1,7 @@
 FNF_ERR = "wc: {}: No such file or directory"
 LONG_OPT_ERR = "wc: unrecognized option '{}'\nTry 'wc --help' for more information."
 SHORT_OPT_ERR = "wc: invalid option -- '{}'\nTry 'wc --help' for more information."
-OPTIONS = ["l", "w", "c"]
+ALLOWED_OPTIONS = ["l", "w", "c"]
 
 def processFile(filepath):
   linecount, wordcount, bytecount = 0, 0, 0
@@ -35,7 +35,7 @@ def getOptions():
   return list(set(options))
 
 def getLongOptions(arg):
-  if arg[2:] in OPTIONS:
+  if arg[2:] in ALLOWED_OPTIONS:
     return arg[2:]
   else:
     print(LONG_OPT_ERR.format(arg))
@@ -44,7 +44,7 @@ def getLongOptions(arg):
 def getShortOptions(arg):
   options = []
   for c in arg[1:]:
-    if c in OPTIONS:
+    if c in ALLOWED_OPTIONS:
       options.append(c)
     else:
       print(SHORT_OPT_ERR.format(arg))
@@ -52,14 +52,15 @@ def getShortOptions(arg):
 
   return options
 
-def printOutput(lc, wc, bc, last):
+def printOutput(lc, wc, bc, last, options):
   args = []
   output = ""
-  if "l" in options:
+
+  if ALLOWED_OPTIONS[0] in options or len(options) == 0:
     args.append(lc)
-  if "w" in options:
+  if ALLOWED_OPTIONS[1] in options or len(options) == 0:
     args.append(wc)
-  if "c" in options:
+  if ALLOWED_OPTIONS[2] in options or len(options) == 0:
     args.append(bc)
 
   args.append(last)
@@ -109,9 +110,9 @@ if __name__ == "__main__":
         totalWC += wc
         totalBC += bc
 
-        printOutput(lc, wc, bc, arg)
+        printOutput(lc, wc, bc, arg, options)
       except FileNotFoundError:
         print(FNF_ERR.format(arg))
 
     if files > 2:
-      printOutput(totalLC, totalWC, totalBC, "total")
+      printOutput(totalLC, totalWC, totalBC, "total", options)
