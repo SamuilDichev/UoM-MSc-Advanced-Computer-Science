@@ -1,9 +1,9 @@
-OUTPUT = "\t{}\t{}\t{}\t{}"
 FNF_ERR = "wc: {}: No such file or directory"
-UNKNOWN_OPT_ERR = "wc: unknown option -- {}\nTry 'wc --help' for more information."
+LONG_OPT_ERR = "wc: unrecognized option '{}'\nTry 'wc --help' for more information."
+SHORT_OPT_ERR = "wc: invalid option -- '{}'\nTry 'wc --help' for more information."
 OPTIONS = ["l", "w", "c"]
 
-def processFile(filepath, options=0):
+def processFile(filepath):
   linecount, wordcount, bytecount = 0, 0, 0
 
   try:
@@ -21,16 +21,53 @@ def processFile(filepath, options=0):
 def getOptions():
   options = []
   for arg in sys.argv[1:]:
-    if arg != "-" and str(arg).startswith("-"):
-      if not isOption(arg):
-        print(UNKNOWN_OPT_ERR.format(arg[0:]))
-        sys.exit(1)
+    if arg == "-":
+      continue
+    elif str(arg).startswith("--"):
+      longOpts = getLongOptions(arg)
+      if longOpts:
+        options.append(longOpts)
+    elif str(arg).startswith("-"):
+      shortOpts = getShortOptions(arg)
+      if shortOpts:
+        options.extend(shortOpts)
+
+  return list(set(options))
+
+def getLongOptions(arg):
+  if arg[2:] in OPTIONS:
+    return arg[2:]
+  else:
+    print(LONG_OPT_ERR.format(arg))
+    sys.exit(1)
+
+def getShortOptions(arg):
+  options = []
+  for c in arg[1:]:
+    if c in OPTIONS:
+      options.append(c)
+    else:
+      print(SHORT_OPT_ERR.format(arg))
+      sys.exit(1)
 
   return options
 
-def isOption(arg):
-  return str(arg).count("-") <= 2
+def printOutput(lc, wc, bc, last):
+  args = []
+  output = ""
+  if "l" in options:
+    args.append(lc)
+  if "w" in options:
+    args.append(wc)
+  if "c" in options:
+    args.append(bc)
 
+  args.append(last)
+
+  for arg in args:
+    output += "\t" + str(arg)
+
+  print(output)
 
 if __name__ == "__main__":
   import sys
@@ -44,12 +81,15 @@ if __name__ == "__main__":
 
   # TODO I've not considered Folders and PDFs. Check how wc handles them.
 
+  # TODO If arg before a flag is -- then flag is considered a file name?
+
   # wc spec (5)
   if len(sys.argv) < 2:
     print(FNF_ERR.format(""))
     sys.exit(1)
   else:
     totalLC, totalWC, totalBC = 0, 0, 0
+    files = 0
     options = getOptions()
     for arg in sys.argv[1:]:
 
@@ -62,17 +102,16 @@ if __name__ == "__main__":
         continue
 
       try:
+        files += 1
         result = processFile(arg)
         lc, wc, bc = result[0], result[1], result[2]
         totalLC += lc
         totalWC += wc
         totalBC += bc
-        print(OUTPUT.format(lc, wc, bc, arg))
+
+        printOutput(lc, wc, bc, arg)
       except FileNotFoundError:
         print(FNF_ERR.format(arg))
 
-    if len(sys.argv) > 2:
-      print(OUTPUT.format(totalLC, totalWC, totalBC, "total"))
-
-    print(options)
-
+    if files > 2:
+      printOutput(totalLC, totalWC, totalBC, "total")
