@@ -1,5 +1,6 @@
 FNF_ERR = "wc: {}: No such file or directory"
-LONG_OPT_ERR = "wc: unrecognized option '{}'\nTry 'wc --help' for more information."
+DIR_ERR = "wc: {}: Is a directory"
+LONG_OPT_ERR = "wc: unrecognised option '{}'\nTry 'wc --help' for more information."
 SHORT_OPT_ERR = "wc: invalid option -- '{}'\nTry 'wc --help' for more information."
 ALLOWED_OPTIONS = ["l", "w", "c"]
 
@@ -47,7 +48,7 @@ def getShortOptions(arg):
     if c in ALLOWED_OPTIONS:
       options.append(c)
     else:
-      print(SHORT_OPT_ERR.format(arg))
+      print(SHORT_OPT_ERR.format(c))
       sys.exit(1)
 
   return options
@@ -73,12 +74,9 @@ def printOutput(lc, wc, bc, last, options):
 if __name__ == "__main__":
   import sys
 
-  # TODO DO NOT FORGET TO HANDLE WILD CARDS (*)
-  # TODO * should be expanded by bash on its own, so shouldn't need to handle it
-  # TODO But maybe for Windows?
-
-  # TODO * arg on Windows throws exceptions.
-  # TODO Check if "*" on Linux does too and compare to wc, to see if identical.
+  # TODO args "*" and \* are quoted in '' by wc, but not by wc.py. E.g.
+  # TODO $ wc: '*': No such file or directory
+  # TODO $ wc: *: No such file or directory
 
   # TODO I've not considered Folders and PDFs. Check how wc handles them.
 
@@ -113,6 +111,9 @@ if __name__ == "__main__":
         printOutput(lc, wc, bc, arg, options)
       except FileNotFoundError:
         print(FNF_ERR.format(arg))
+      except IsADirectoryError:
+        print(DIR_ERR.format(arg))
+        printOutput(0, 0, 0, arg, options)
 
     if files > 1:
       printOutput(totalLC, totalWC, totalBC, "total", options)
