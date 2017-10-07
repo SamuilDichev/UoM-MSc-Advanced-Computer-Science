@@ -114,5 +114,5 @@ if __name__ == "__main__":
       except FileNotFoundError:
         print(FNF_ERR.format(arg))
 
-    if files > 2:
+    if files > 1:
       printOutput(totalLC, totalWC, totalBC, "total", options)
