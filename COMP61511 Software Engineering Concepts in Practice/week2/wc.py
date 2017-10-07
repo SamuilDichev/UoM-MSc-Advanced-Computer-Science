@@ -1,5 +1,6 @@
 FNF_ERR = "wc: {}: No such file or directory"
 DIR_ERR = "wc: {}: Is a directory"
+PERMISSION_ERROR = "wc: {}: Permission denied"
 LONG_OPT_ERR = "wc: unrecognised option '{}'\nTry 'wc --help' for more information."
 SHORT_OPT_ERR = "wc: invalid option -- '{}'\nTry 'wc --help' for more information."
 ALLOWED_OPTIONS = ["l", "w", "c"]
@@ -7,15 +8,11 @@ ALLOWED_OPTIONS = ["l", "w", "c"]
 def processFile(filepath):
   linecount, wordcount, bytecount = 0, 0, 0
 
-  try:
-    with open(filepath, 'rb') as f:
-      for line in f:
-        linecount += 1
-        wordcount += len(line.split())
-        bytecount += len(line)
-
-  except FileNotFoundError:
-    raise
+  with open(filepath, 'rb') as f:
+    for line in f:
+      linecount += line.count(b'\n')
+      wordcount += len(line.split())
+      bytecount += len(line)
 
   return linecount, wordcount, bytecount, filepath
 
@@ -39,7 +36,7 @@ def getLongOptions(arg):
   if arg[2:] in ALLOWED_OPTIONS:
     return arg[2:]
   else:
-    print(LONG_OPT_ERR.format(arg))
+    eprint(LONG_OPT_ERR.format(arg))
     sys.exit(1)
 
 def getShortOptions(arg):
@@ -48,7 +45,7 @@ def getShortOptions(arg):
     if c in ALLOWED_OPTIONS:
       options.append(c)
     else:
-      print(SHORT_OPT_ERR.format(c))
+      eprint(SHORT_OPT_ERR.format(c))
       sys.exit(1)
 
   return options
@@ -71,6 +68,9 @@ def printOutput(lc, wc, bc, last, options):
 
   print(output)
 
+def eprint(*args, **kwargs):
+  print(*args, file=sys.stderr, **kwargs)
+
 if __name__ == "__main__":
   import sys
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
   # wc spec (5)
   if len(sys.argv) < 2:
-    print(FNF_ERR.format(""))
+    eprint(FNF_ERR.format(""))
     sys.exit(1)
   else:
     totalLC, totalWC, totalBC = 0, 0, 0
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
       # wc spec (5)
       if arg == "-":
-        print(FNF_ERR.format(arg))
+        eprint(FNF_ERR.format(arg))
         continue
 
       if str(arg).startswith("-"):
@@ -110,10 +110,12 @@ if __name__ == "__main__":
 
         printOutput(lc, wc, bc, arg, options)
       except FileNotFoundError:
-        print(FNF_ERR.format(arg))
+        eprint(FNF_ERR.format(arg))
       except IsADirectoryError:
-        print(DIR_ERR.format(arg))
+        eprint(DIR_ERR.format(arg))
         printOutput(0, 0, 0, arg, options)
+      except PermissionError:
+        eprint(PERMISSION_ERROR.format(arg))
 
     if files > 1:
       printOutput(totalLC, totalWC, totalBC, "total", options)
