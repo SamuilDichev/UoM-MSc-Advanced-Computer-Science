@@ -1,12 +1,18 @@
-# Everything is in a docstring!
-"""
->>> import subprocess
->>> subprocess.check_output('wc wc.py', shell=True)
-b' 120  364 3183 wc.py\\n'
-"""
+def testAllInputs():
+  """
+  >>> import subprocess
+  >>> try:
+  ...   wcOut = subprocess.check_output("wc testinputs/* 2>&1", shell=True)
+  ... except subprocess.CalledProcessError as exc:
+  ...   wcOut = exc.output
+  >>>
+  >>> wcPyOut = subprocess.check_output("python3 wc.py testinputs/* 2>&1", shell=True)
+  >>> wcOut = [str(s) for s in wcOut.split()]
+  >>> wcPyOut = [str(s) for s in wcPyOut.split()]
+  >>> wcOut == wcPyOut
+  True
+  """
 
- # We add the boilerplate to make this module both executable and importable.
 if __name__ == "__main__":
-    import doctest
-    # The following command extracts all testable docstrings from the current module.
-    doctest.testmod()
+  import doctest
+  doctest.testmod()
