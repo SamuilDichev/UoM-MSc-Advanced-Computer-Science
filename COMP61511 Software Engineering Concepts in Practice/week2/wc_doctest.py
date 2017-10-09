@@ -13,6 +13,8 @@ def testAllInputs():
   True
   """
 
+# TODO Make the above vary generate combinations of flags.
+
 if __name__ == "__main__":
   import doctest
   doctest.testmod()
