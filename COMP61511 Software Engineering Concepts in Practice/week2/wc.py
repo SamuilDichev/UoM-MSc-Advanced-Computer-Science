@@ -96,9 +96,11 @@ if __name__ == "__main__":
         eprint(FNF_ERR.format(arg))
         continue
       elif arg == "--":
+        # Mother of all that is holy, what kind of drugs were the devs of wc on?!
         disgusting = True
         continue
 
+      # Absolutely revolting
       if str(arg).startswith("-") and not disgusting:
           continue
 
