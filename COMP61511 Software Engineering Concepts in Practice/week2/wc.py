@@ -77,9 +77,6 @@ def eprint(*args, **kwargs):
 if __name__ == "__main__":
   import sys
 
-  # TODO I've not considered PDFs. Check how wc handles them.
-  # TODO If arg before a flag is -- then flag is considered a file name?
-
   # wc spec (5)
   if len(sys.argv) < 2:
     eprint(FNF_ERR.format(""))
