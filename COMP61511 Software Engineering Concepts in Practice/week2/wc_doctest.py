@@ -336,6 +336,10 @@ b'wc: lcw: No such file or directory\\n'
 b'\\t0\\t0\\t0\\ttestinputs/empty.txt\\n\\t15\\t22\\t484\\ttestinputs/os-release\\n\\t16\\t85\\t531\\ttestinputs/rc.local\\n\\t11176\\t61033\\t670293\\ttestinputs/services\\n\\t1\\t1\\t2\\ttestinputs/small.txt\\n\\t2\\t1\\t3\\ttestinputs/small2.txt\\n\\t50\\t172\\t1135\\ttestinputs/zshrc\\n\\t11260\\t61314\\t672448\\ttotal\\n'
 >>> subprocess.check_output("python3 wc.py lcw testinputs/* 2>&1 >/dev/null", shell=True)
 b'wc: lcw: No such file or directory\\n'
+>>> subprocess.check_output("python3 wc.py testinputs 2>/dev/null", shell=True)
+b'\\t0\\t0\\t0\\ttestinputs\\n'
+>>> subprocess.check_output("python3 wc.py testinputs 2>&1 >/dev/null", shell=True)
+b'wc: testinputs: Is a directory\\n'
 """
 
 if __name__ == "__main__":

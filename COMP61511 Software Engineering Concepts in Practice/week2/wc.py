@@ -78,7 +78,7 @@ if __name__ == "__main__":
   # TODO $ wc: '*': No such file or directory
   # TODO $ wc: *: No such file or directory
 
-  # TODO I've not considered Folders and PDFs. Check how wc handles them.
+  # TODO I've not considered PDFs. Check how wc handles them.
 
   # TODO If arg before a flag is -- then flag is considered a file name?
 
