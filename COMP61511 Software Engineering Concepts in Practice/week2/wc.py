@@ -4,6 +4,7 @@ PERMISSION_ERROR = "wc: {}: Permission denied"
 LONG_OPT_ERR = "wc: unrecognised option '{}'\nTry 'wc --help' for more information."
 SHORT_OPT_ERR = "wc: invalid option -- '{}'\nTry 'wc --help' for more information."
 ALLOWED_OPTIONS = ["l", "w", "c"]
+ESCAPED_SYMBOLS = ["!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|"]
 
 def processFile(filepath):
   linecount, wordcount, bytecount = 0, 0, 0
@@ -18,9 +19,11 @@ def processFile(filepath):
 
 def getOptions():
   options = []
-  for arg in sys.argv[1:]:
+  for i, arg in enumerate(sys.argv[1:]):
     if arg == "-":
       continue
+    elif str(arg) == "--":
+      break
     elif str(arg).startswith("--"):
       longOpts = getLongOptions(arg)
       if longOpts:
@@ -74,12 +77,7 @@ def eprint(*args, **kwargs):
 if __name__ == "__main__":
   import sys
 
-  # TODO args "*" and \* are quoted in '' by wc, but not by wc.py. E.g.
-  # TODO $ wc: '*': No such file or directory
-  # TODO $ wc: *: No such file or directory
-
   # TODO I've not considered PDFs. Check how wc handles them.
-
   # TODO If arg before a flag is -- then flag is considered a file name?
 
   # wc spec (5)
@@ -90,15 +88,19 @@ if __name__ == "__main__":
     totalLC, totalWC, totalBC = 0, 0, 0
     files = 0
     options = getOptions()
-    for arg in sys.argv[1:]:
+    disgusting = False
+    for i, arg in enumerate(sys.argv[1:]):
 
       # wc spec (5)
       if arg == "-":
         eprint(FNF_ERR.format(arg))
         continue
-
-      if str(arg).startswith("-"):
+      elif arg == "--":
+        disgusting = True
         continue
+
+      if str(arg).startswith("-") and not disgusting:
+          continue
 
       try:
         files += 1
@@ -110,6 +112,11 @@ if __name__ == "__main__":
 
         printOutput(lc, wc, bc, arg, options)
       except FileNotFoundError:
+        for c in arg:
+          if str(c) in ESCAPED_SYMBOLS:
+            arg = "'{}'".format(arg)
+            break
+
         eprint(FNF_ERR.format(arg))
       except IsADirectoryError:
         eprint(DIR_ERR.format(arg))
