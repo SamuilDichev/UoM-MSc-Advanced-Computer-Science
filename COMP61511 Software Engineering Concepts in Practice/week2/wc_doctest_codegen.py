@@ -39,4 +39,5 @@ if __name__ == "__main__":
   import doctest
   import subprocess
   from itertools import permutations
-  doctest.testmod()
+  generateTest()
+  doctest.testfile("tests.txt")
