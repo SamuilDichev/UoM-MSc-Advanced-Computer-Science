@@ -4,6 +4,8 @@ PERMISSION_ERROR = "wc: {}: Permission denied"
 LONG_OPT_ERR = "wc: unrecognised option '{}'\nTry 'wc --help' for more information."
 SHORT_OPT_ERR = "wc: invalid option -- '{}'\nTry 'wc --help' for more information."
 ALLOWED_OPTIONS = ["l", "w", "c"]
+
+# WHAT THE FUCK, wc?
 ESCAPED_SYMBOLS = ["!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|"]
 
 def processFile(filepath):
