@@ -19,57 +19,69 @@ def processFile(filepath):
 
   return linecount, wordcount, bytecount, filepath
 
-def getOptions():
+def processFiles(files):
+  totalLC, totalWC, totalBC = 0, 0, 0
+
+  for file in files:
+    try:
+      result = processFile(file)
+      lc, wc, bc = result[0], result[1], result[2]
+      totalLC += lc
+      totalWC += wc
+      totalBC += bc
+
+      printOutput(lc, wc, bc, file, options)
+    except FileNotFoundError:
+      for c in file:
+        if str(c) in ESCAPED_SYMBOLS:
+          file = "'{}'".format(file)
+          break
+
+      eprint(FNF_ERR.format(file))
+    except IsADirectoryError:
+      eprint(DIR_ERR.format(file))
+      printOutput(0, 0, 0, file, options)
+    except PermissionError:
+      eprint(PERMISSION_ERROR.format(file))
+
+  if len(files) > 1:
+    printOutput(totalLC, totalWC, totalBC, "total", options)
+
+def createArgParser():
+  global parser
+  parser = argparse.ArgumentParser(add_help=False)
+
+  for option in ALLOWED_OPTIONS:
+    parser.add_argument("-{}".format(option), "--{}".format(option), action="store_true")
+
+  parser.add_argument("FILE", nargs="*")
+
+def getOptions(args):
   options = []
-  for i, arg in enumerate(sys.argv[1:]):
-    if arg == "-":
-      continue
-    elif str(arg) == "--":
-      break
-    elif str(arg).startswith("--"):
-      longOpts = getLongOptions(arg)
-      if longOpts:
-        options.append(longOpts)
-    elif str(arg).startswith("-"):
-      shortOpts = getShortOptions(arg)
-      if shortOpts:
-        options.extend(shortOpts)
-
-  return list(set(options))
-
-def getLongOptions(arg):
-  if arg[2:] in ALLOWED_OPTIONS:
-    return arg[2:]
-  else:
-    eprint(LONG_OPT_ERR.format(arg))
-    sys.exit(1)
-
-def getShortOptions(arg):
-  options = []
-  for c in arg[1:]:
-    if c in ALLOWED_OPTIONS:
-      options.append(c)
-    else:
-      eprint(SHORT_OPT_ERR.format(c))
-      sys.exit(1)
+  for arg,v in vars(args).items():
+    if v == True:
+      options.append(arg)
 
   return options
 
+def handleBadArgs(args):
+  if str(args[0]).startswith("--"):
+    eprint(LONG_OPT_ERR.format(args[0]))
+  else:
+    eprint(SHORT_OPT_ERR.format(args[0][1:]))
+
+  sys.exit(1)
+
 def printOutput(lc, wc, bc, last, options):
-  args = []
   output = ""
-
   if ALLOWED_OPTIONS[0] in options or len(options) == 0:
-    args.append(lc)
+    output += "\t{}".format(lc)
   if ALLOWED_OPTIONS[1] in options or len(options) == 0:
-    args.append(wc)
+    output += "\t{}".format(wc)
   if ALLOWED_OPTIONS[2] in options or len(options) == 0:
-    args.append(bc)
+    output += "\t{}".format(bc)
 
-  args.append(last)
-
-  for arg in args:
-    output += "\t" + str(arg)
+  output += "\t{}".format(last)
 
   print(output)
 
@@ -78,52 +90,17 @@ def eprint(*args, **kwargs):
 
 if __name__ == "__main__":
   import sys
+  import argparse
 
-  # wc spec (5)
+  createArgParser()
+  args, badArgs = parser.parse_known_args(sys.argv[1:])
+
+  if len(badArgs) > 0:
+    handleBadArgs(badArgs)
+
   if len(sys.argv) < 2:
     eprint(FNF_ERR.format(""))
     sys.exit(1)
   else:
-    totalLC, totalWC, totalBC = 0, 0, 0
-    files = 0
-    options = getOptions()
-    disgusting = False
-    for i, arg in enumerate(sys.argv[1:]):
-
-      # wc spec (5)
-      if arg == "-":
-        eprint(FNF_ERR.format(arg))
-        continue
-      elif arg == "--":
-        # Mother of all that is holy, what kind of drugs were the devs of wc on?!
-        disgusting = True
-        continue
-
-      # Absolutely revolting
-      if str(arg).startswith("-") and not disgusting:
-          continue
-
-      try:
-        files += 1
-        result = processFile(arg)
-        lc, wc, bc = result[0], result[1], result[2]
-        totalLC += lc
-        totalWC += wc
-        totalBC += bc
-
-        printOutput(lc, wc, bc, arg, options)
-      except FileNotFoundError:
-        for c in arg:
-          if str(c) in ESCAPED_SYMBOLS:
-            arg = "'{}'".format(arg)
-            break
-
-        eprint(FNF_ERR.format(arg))
-      except IsADirectoryError:
-        eprint(DIR_ERR.format(arg))
-        printOutput(0, 0, 0, arg, options)
-      except PermissionError:
-        eprint(PERMISSION_ERROR.format(arg))
-
-    if files > 1:
-      printOutput(totalLC, totalWC, totalBC, "total", options)
+    options = getOptions(args)
+    processFiles(args.FILE)

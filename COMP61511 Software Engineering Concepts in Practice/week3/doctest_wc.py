@@ -343,6 +343,37 @@ b'wc: testinputs: Is a directory\\n'
 b'\\t670293\\ttestinputs/services\\n\\t670293\\ttotal\\n'
 >>> subprocess.check_output("python3 wc.py -c -- -l testinputs/services 2>&1 >/dev/null", shell=True)
 b'wc: -l: No such file or directory\\n'
+>>> subprocess.check_output("python3 wc.py '$' 2>/dev/null", shell=True)
+b''
+>>> subprocess.check_output("python3 wc.py '$' 2>&1 >/dev/null", shell=True)
+b"wc: '$': No such file or directory\\n"
+>>> try:
+...   subprocess.check_output("python3 wc.py - testinputs/services 2>/dev/null", shell=True)
+... except subprocess.CalledProcessError as e:
+...   e.output
+b'\\t11176\\t61033\\t670293\\ttestinputs/services\\n\\t11176\\t61033\\t670293\\ttotal\\n'
+>>> subprocess.check_output("python3 wc.py - testinputs/services 2>&1 >/dev/null", shell=True)
+b'wc: -: No such file or directory\\n'
+>>> try:
+...   subprocess.check_output("python3 wc.py -z testinputs/services 2>/dev/null", shell=True)
+... except subprocess.CalledProcessError as e:
+...   e.output
+b''
+>>> try:
+...   subprocess.check_output("python3 wc.py -z testinputs/services 2>&1 >/dev/null", shell=True)
+... except subprocess.CalledProcessError as e:
+...   e.output
+b"wc: invalid option -- 'z'\\nTry 'wc --help' for more information.\\n"
+>>> try:
+...   subprocess.check_output("python3 wc.py --z testinputs/services 2>/dev/null", shell=True)
+... except subprocess.CalledProcessError as e:
+...   e.output
+b''
+>>> try:
+...   subprocess.check_output("python3 wc.py --z testinputs/services 2>&1 >/dev/null", shell=True)
+... except subprocess.CalledProcessError as e:
+...   e.output
+b"wc: unrecognised option '--z'\\nTry 'wc --help' for more information.\\n"
 """
 
 if __name__ == "__main__":
