@@ -1,3 +1,6 @@
+import sys
+import argparse
+
 FNF_ERR = "wc: {}: No such file or directory"
 ZERO_LENGTH_FILE = "wc: invalid zero-length file name"
 DIR_ERR = "wc: {}: Is a directory"
@@ -7,7 +10,7 @@ SHORT_OPT_ERR = "wc: invalid option -- '{}'\nTry 'wc --help' for more informatio
 ALLOWED_OPTIONS = ["l", "w", "c"]
 
 # WHAT THE FUCK, wc?
-ESCAPED_SYMBOLS = ["!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|"]
+ESCAPED_SYMBOLS = [" ", "!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|"]
 
 def processFile(filepath):
   linecount, wordcount, bytecount = 0, 0, 0
@@ -33,20 +36,22 @@ def processFiles(filepaths, options):
 
       printOutput(lc, wc, bc, filepath, options)
     except FileNotFoundError:
-      for c in filepath:
-        if str(c) in ESCAPED_SYMBOLS:
-          filepath = "'{}'".format(filepath)
-          break
-
-      eprint(FNF_ERR.format(filepath))
+      eprint(FNF_ERR.format(escapeIllegalSymbols(filepath)))
     except IsADirectoryError:
-      eprint(DIR_ERR.format(filepath))
+      eprint(DIR_ERR.format(escapeIllegalSymbols(filepath)))
       printOutput(0, 0, 0, filepath, options)
     except PermissionError:
-      eprint(PERMISSION_ERROR.format(filepath))
+      eprint(PERMISSION_ERROR.format(escapeIllegalSymbols(filepath)))
 
   if len(filepaths) > 1:
     printOutput(totalLC, totalWC, totalBC, "total", options)
+
+def escapeIllegalSymbols(string):
+  for c in string:
+    if str(c) in ESCAPED_SYMBOLS:
+      return "'{}'".format(string)
+
+  return string
 
 def createArgParser():
   parser = argparse.ArgumentParser(add_help=False)
@@ -58,9 +63,9 @@ def createArgParser():
 
   return parser
 
-def getOptions(args):
+def getOptions(namespace):
   options = []
-  for arg,v in vars(args).items():
+  for arg,v in vars(namespace).items():
     if v == True:
       options.append(arg)
 
@@ -91,9 +96,6 @@ def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
 
 if __name__ == "__main__":
-  import sys
-  import argparse
-
   parser = createArgParser()
   args, badArgs = parser.parse_known_args(sys.argv[1:])
 
