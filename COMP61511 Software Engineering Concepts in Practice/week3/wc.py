@@ -1,4 +1,5 @@
 FNF_ERR = "wc: {}: No such file or directory"
+ZERO_LENGTH_FILE = "wc: invalid zero-length file name"
 DIR_ERR = "wc: {}: Is a directory"
 PERMISSION_ERROR = "wc: {}: Permission denied"
 LONG_OPT_ERR = "wc: unrecognised option '{}'\nTry 'wc --help' for more information."
@@ -19,42 +20,43 @@ def processFile(filepath):
 
   return linecount, wordcount, bytecount, filepath
 
-def processFiles(files):
+def processFiles(filepaths, options):
   totalLC, totalWC, totalBC = 0, 0, 0
 
-  for file in files:
+  for filepath in filepaths:
     try:
-      result = processFile(file)
+      result = processFile(filepath)
       lc, wc, bc = result[0], result[1], result[2]
       totalLC += lc
       totalWC += wc
       totalBC += bc
 
-      printOutput(lc, wc, bc, file, options)
+      printOutput(lc, wc, bc, filepath, options)
     except FileNotFoundError:
-      for c in file:
+      for c in filepath:
         if str(c) in ESCAPED_SYMBOLS:
-          file = "'{}'".format(file)
+          filepath = "'{}'".format(filepath)
           break
 
-      eprint(FNF_ERR.format(file))
+      eprint(FNF_ERR.format(filepath))
     except IsADirectoryError:
-      eprint(DIR_ERR.format(file))
-      printOutput(0, 0, 0, file, options)
+      eprint(DIR_ERR.format(filepath))
+      printOutput(0, 0, 0, filepath, options)
     except PermissionError:
-      eprint(PERMISSION_ERROR.format(file))
+      eprint(PERMISSION_ERROR.format(filepath))
 
-  if len(files) > 1:
+  if len(filepaths) > 1:
     printOutput(totalLC, totalWC, totalBC, "total", options)
 
 def createArgParser():
-  global parser
   parser = argparse.ArgumentParser(add_help=False)
 
   for option in ALLOWED_OPTIONS:
     parser.add_argument("-{}".format(option), "--{}".format(option), action="store_true")
 
   parser.add_argument("FILE", nargs="*")
+
+  return parser
 
 def getOptions(args):
   options = []
@@ -92,15 +94,15 @@ if __name__ == "__main__":
   import sys
   import argparse
 
-  createArgParser()
+  parser = createArgParser()
   args, badArgs = parser.parse_known_args(sys.argv[1:])
 
   if len(badArgs) > 0:
     handleBadArgs(badArgs)
 
+  # TODO Which error? Invalid zero-length or no such file?
   if len(sys.argv) < 2:
     eprint(FNF_ERR.format(""))
     sys.exit(1)
   else:
-    options = getOptions(args)
-    processFiles(args.FILE)
+    processFiles(args.FILE, getOptions(args))
