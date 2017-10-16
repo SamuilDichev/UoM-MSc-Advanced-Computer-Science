@@ -5,8 +5,6 @@ from io import StringIO
 
 class TestStringMethods(unittest.TestCase):
 
-
-
   def test_parser(self):
     from .wc import createArgParser
 
@@ -81,14 +79,14 @@ class TestStringMethods(unittest.TestCase):
     # Extract stderr and stdout as variables, so we can compare results
     with self.captured_output() as (stdout, stderr):
       """
-      Testing with only good options as this function doesn't actually handle options, it merely passes them onto
-      the print function which is tested in another test
+      Testing only good options (only valid) as this function doesn't actually handle options,
+      it merely passes them onto the print function which is tested in another unit test
       """
       options = ["c", "w", "l"]
       processFiles(filepaths, options)
 
-    output = stdout.getvalue().strip()
-    errors = stderr.getvalue().strip()
+    output = stdout.getvalue()
+    errors = stderr.getvalue()
 
     # Create a filepath string (all filepaths in a string, each quotes and each separated by a space
     filepathsString = ""
@@ -101,10 +99,111 @@ class TestStringMethods(unittest.TestCase):
     self.assertEqual("".join(str(output).split()), "".join(wcStdout.split()))
     self.assertEqual("".join(str(errors).split()), "".join(wcStderr.split()))
 
-  # TODO test escapeIllegalSymbols()
-  # TODO test handleBadArgs()
-  # TODO test printOutput()
-  # TODO test eprint()
+  def test_escapeIllegalSymbols(self):
+    from .wc import escapeIllegalSymbols
+    illegalSymbols = [" ", "!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|"]
+    exampleLegalSymbols = ["@", "%", "£", "€", "¥", "_"]
+    legalString = "The_quick_brown_fox_jumps_over_the_lazy_dog"
+
+    for s in illegalSymbols:
+      testString = legalString[:5] + s + legalString[5:]
+      escapedString = escapeIllegalSymbols(testString)
+      self.assertEqual("'{}'".format(testString), escapedString)
+
+    for s in exampleLegalSymbols:
+      testString = legalString[:5] + s + legalString[5:]
+      escapedString = escapeIllegalSymbols(testString)
+      self.assertEqual(testString, escapedString)
+
+  """
+  Albeit short, this test covers the entire expected functionality of this function.
+  It's merely supposed to print a slightly different error based on whether an option is prepended
+  with a double hyphen '--' or a single one '-'
+  """
+  def test_printBadArgsError(self):
+    from .wc import printBadArgsError
+    with self.captured_output() as (stdout, stderr):
+      printBadArgsError(["-z"])
+
+    self.assertEqual("", stdout.getvalue())
+    self.assertEqual("wc: invalid option -- 'z'\nTry 'wc --help' for more information.\n", stderr.getvalue())
+
+    with self.captured_output() as (stdout, stderr):
+      printBadArgsError(["--z"])
+
+    self.assertEqual("", stdout.getvalue())
+    self.assertEqual("wc: unrecognised option '--z'\nTry 'wc --help' for more information.\n", stderr.getvalue())
+
+  """
+  Tests that printOutput always prints the correct output based on what flags are given to it
+  """
+  def test_printOutput(self):
+    lc, wc, bc, file = 1, 2, 3, "filename"
+    doubleOutput = "\t{}\t{}\n"
+    tripleOutput = "\t{}\t{}\t{}\n"
+    quadOutput = "\t{}\t{}\t{}\t{}\n"
+
+    # Test -c option
+    options = ["c"]
+    self.assertOutput(lc, wc, bc, file, options, doubleOutput.format(bc, file))
+
+    # Test -l option
+    options = ["l"]
+    self.assertOutput(lc, wc, bc, file, options, doubleOutput.format(lc, file))
+
+    # Test -w option
+    options = ["w"]
+    self.assertOutput(lc, wc, bc, file, options, doubleOutput.format(wc, file))
+
+    # Test 2 options (-c -l)
+    options = ["c", "l"]
+    self.assertOutput(lc, wc, bc, file, options, tripleOutput.format(lc, bc, file))
+
+    # Test 2 options (-w -c)
+    options = ["w", "c"]
+    self.assertOutput(lc, wc, bc, file, options, tripleOutput.format(wc, bc, file))
+
+    # Test 3 options
+    options = ["c", "l", "w"]
+    self.assertOutput(lc, wc, bc, file, options, quadOutput.format(lc, wc, bc, file))
+
+    # Test 0 options
+    options = []
+    self.assertOutput(lc, wc, bc, file, options, quadOutput.format(lc, wc, bc, file))
+
+    # Test bad options
+    options = ["z", "q"]
+    self.assertOutput(lc, wc, bc, file, options, quadOutput.format(lc, wc, bc, file))
+
+    # Test mix of good and bad options
+    options = ["z", "q", "w"]
+    self.assertOutput(lc, wc, bc, file, options, doubleOutput.format(wc, file))
+
+
+  """
+  Helper for printOutput test. Does the actual assertions.
+  """
+  def assertOutput(self, lc, wrc, bc, file, options, expectedStdout):
+    from .wc import printOutput
+
+    with self.captured_output() as (stdout, stderr):
+      printOutput(lc, wrc, bc, file, options)
+
+    self.assertEqual(stdout.getvalue(), expectedStdout)
+    self.assertEqual(stderr.getvalue(), "")
+
+  """
+  Tests that errors end up in stderr, not stdout
+  """
+  def test_eprint(self):
+    from .wc import eprint
+
+    error = "this error should end up in stderr, not in stdout"
+    with self.captured_output() as (stdout, stderr):
+      eprint(error)
+
+    self.assertEqual("", stdout.getvalue())
+    self.assertEqual("{}\n".format(error), stderr.getvalue())
 
   """
   Used to retrieve the stdout of GNU wc for certain file and flags, so it can be compared

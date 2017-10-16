@@ -71,16 +71,21 @@ def getOptions(namespace):
 
   return options
 
-def handleBadArgs(args):
+"""
+Always prints an error as it expects it's always given bad args.
+Does not do any checking if the arguments are actually bad, simply formats the error
+correctly according to the type / length of the arguments.
+"""
+def printBadArgsError(args):
   if str(args[0]).startswith("--"):
     eprint(LONG_OPT_ERR.format(args[0]))
   else:
     eprint(SHORT_OPT_ERR.format(args[0][1:]))
 
-  sys.exit(1)
-
 def printOutput(lc, wc, bc, last, options):
   output = ""
+  options = [o for o in options if o in ALLOWED_OPTIONS]
+
   if ALLOWED_OPTIONS[0] in options or len(options) == 0:
     output += "\t{}".format(lc)
   if ALLOWED_OPTIONS[1] in options or len(options) == 0:
@@ -97,10 +102,15 @@ def eprint(*args, **kwargs):
 
 if __name__ == "__main__":
   parser = createArgParser()
+  # TODO Preprocess args to put all flags beginning with - in the beginning.
+  # TODO Be careful not to change the order of -- and other flags.
+  # TODO Remember - is treated as a file, so don't reorder that one
+
   args, badArgs = parser.parse_known_args(sys.argv[1:])
 
   if len(badArgs) > 0:
-    handleBadArgs(badArgs)
+    printBadArgsError(badArgs)
+    sys.exit(1)
 
   # TODO Which error? Invalid zero-length or no such file?
   if len(sys.argv) < 2:
