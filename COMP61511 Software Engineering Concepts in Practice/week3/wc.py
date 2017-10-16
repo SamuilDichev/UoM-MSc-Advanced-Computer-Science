@@ -101,16 +101,22 @@ def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
 
 def preprocessArgs(args):
-  newArgs = []
+  flags = []
+  files = []
+  onlyFilesLeft = False
   for arg in args:
-    if str(arg).startswith("-") and str(arg) != "-":
-      newArgs.append(arg)
+    if str(arg) == "--":
+      onlyFilesLeft = True
 
-  for arg in args:
-    if not str(arg).startswith("-") or str(arg) == "-":
-      newArgs.append(arg)
+    if not onlyFilesLeft and not isFileArg(arg):
+      flags.append(arg)
+    elif onlyFilesLeft or isFileArg(arg):
+      files.append(arg)
 
-  return newArgs
+  return flags + files
+
+def isFileArg(arg):
+  return not str(arg).startswith("-") or str(arg) == "-" or str(arg) == "--"
 
 if __name__ == "__main__":
   parser = createArgParser()

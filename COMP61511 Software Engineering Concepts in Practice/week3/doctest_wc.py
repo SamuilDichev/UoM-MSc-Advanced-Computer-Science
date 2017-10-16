@@ -384,6 +384,16 @@ b'\\t11176\\ttestinputs/services\\n\\t15\\ttestinputs/os-release\\n\\t11191\\tto
 ... except subprocess.CalledProcessError as e:
 ...   e.output
 b''
+>>> try:
+...   subprocess.check_output("python3 wc.py txt1 -l txt2 txt3 -- -w txt4 -- --w txt5 -- txt6 txt7 -- txt8 -c 2>/dev/null", shell=True)
+... except subprocess.CalledProcessError as e:
+...   e.output
+b'\\t0\\ttotal\\n'
+>>> try:
+...   subprocess.check_output("python3 wc.py txt1 -l txt2 txt3 -- -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c 2>&1 >/dev/null", shell=True)
+... except subprocess.CalledProcessError as e:
+...   e.output
+b'wc: txt1: No such file or directory\\nwc: txt2: No such file or directory\\nwc: txt3: No such file or directory\\nwc: -w: No such file or directory\\nwc: txt4: No such file or directory\\nwc: --: No such file or directory\\nwc: --w: No such file or directory\\nwc: txt5: No such file or directory\\nwc: --: No such file or directory\\nwc: txt6: No such file or directory\\nwc: -: No such file or directory\\nwc: txt7: No such file or directory\\nwc: --: No such file or directory\\nwc: -: No such file or directory\\nwc: txt8: No such file or directory\\nwc: -c: No such file or directory\\n'
 """
 
 if __name__ == "__main__":

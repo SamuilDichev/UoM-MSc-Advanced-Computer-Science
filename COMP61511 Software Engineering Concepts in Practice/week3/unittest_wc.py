@@ -7,17 +7,24 @@ class TestStringMethods(unittest.TestCase):
 
   def test_parser(self):
     from .wc import createArgParser
+    from .wc import preprocessArgs
 
     parser = createArgParser()
-    args, badArgs = parser.parse_known_args("-lc filepath1 --w filepath2 -- -z".split())
+    args = "txt1 -l txt2 --flag2 txt3 -- -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split()
+    args, badArgs = parser.parse_known_args(preprocessArgs(args))
 
-    # TODO filepath2 is unrecognized.
-    self.assertTrue(args.c)
+    self.assertFalse(args.c)
     self.assertTrue(args.l)
-    self.assertTrue(args.w)
+    self.assertFalse(args.w)
 
-    # TODO finish the below
-    # self.assertEqual(args.FILE, "filepath1", "filepath2")
+    self.assertEqual(args.FILE, "txt1 txt2 txt3 -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split())
+
+  def test_isFileArg(self):
+    from .wc import isFileArg
+    self.assertFalse(isFileArg("-asasda"))
+    self.assertFalse(isFileArg("-c"))
+    self.assertTrue(isFileArg("--"))
+    self.assertTrue(isFileArg("asdas"))
 
   def test_getOptions(self):
     from .wc import getOptions
@@ -195,8 +202,10 @@ class TestStringMethods(unittest.TestCase):
   def test_preProcessArgs(self):
     from .wc import preprocessArgs
     args = "txt1 -l txt2 --flag2 txt3 -- -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split()
-    expectedArgs = "-l --flag2 -- -w -- --w -- -- -c txt1 txt2 txt3 txt4 txt5 txt6 - txt7 - txt8".split()
+    expectedArgs = "-l --flag2 txt1 txt2 txt3 -- -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split()
     newArgs = preprocessArgs(args)
+
+    self.maxDiff=None
 
     self.assertEqual(newArgs, expectedArgs)
 
