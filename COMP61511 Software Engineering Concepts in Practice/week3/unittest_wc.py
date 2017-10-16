@@ -179,19 +179,6 @@ class TestStringMethods(unittest.TestCase):
     options = ["z", "q", "w"]
     self.assertOutput(lc, wc, bc, file, options, doubleOutput.format(wc, file))
 
-
-  """
-  Helper for printOutput test. Does the actual assertions.
-  """
-  def assertOutput(self, lc, wrc, bc, file, options, expectedStdout):
-    from .wc import printOutput
-
-    with self.captured_output() as (stdout, stderr):
-      printOutput(lc, wrc, bc, file, options)
-
-    self.assertEqual(stdout.getvalue(), expectedStdout)
-    self.assertEqual(stderr.getvalue(), "")
-
   """
   Tests that errors end up in stderr, not stdout
   """
@@ -204,6 +191,26 @@ class TestStringMethods(unittest.TestCase):
 
     self.assertEqual("", stdout.getvalue())
     self.assertEqual("{}\n".format(error), stderr.getvalue())
+
+  def test_preProcessArgs(self):
+    from .wc import preprocessArgs
+    args = "txt1 -l txt2 --flag2 txt3 -- -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split()
+    expectedArgs = "-l --flag2 -- -w -- --w -- -- -c txt1 txt2 txt3 txt4 txt5 txt6 - txt7 - txt8".split()
+    newArgs = preprocessArgs(args)
+
+    self.assertEqual(newArgs, expectedArgs)
+
+  """
+  Helper for printOutput test. Does the actual assertions.
+  """
+  def assertOutput(self, lc, wrc, bc, file, options, expectedStdout):
+    from .wc import printOutput
+
+    with self.captured_output() as (stdout, stderr):
+      printOutput(lc, wrc, bc, file, options)
+
+    self.assertEqual(stdout.getvalue(), expectedStdout)
+    self.assertEqual(stderr.getvalue(), "")
 
   """
   Used to retrieve the stdout of GNU wc for certain file and flags, so it can be compared

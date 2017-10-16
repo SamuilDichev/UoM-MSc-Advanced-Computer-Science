@@ -100,13 +100,26 @@ def printOutput(lc, wc, bc, last, options):
 def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
 
+def preprocessArgs(args):
+  newArgs = []
+  for arg in args:
+    if str(arg).startswith("-") and str(arg) != "-":
+      newArgs.append(arg)
+
+  for arg in args:
+    if not str(arg).startswith("-") or str(arg) == "-":
+      newArgs.append(arg)
+
+  return newArgs
+
 if __name__ == "__main__":
   parser = createArgParser()
   # TODO Preprocess args to put all flags beginning with - in the beginning.
   # TODO Be careful not to change the order of -- and other flags.
   # TODO Remember - is treated as a file, so don't reorder that one
 
-  args, badArgs = parser.parse_known_args(sys.argv[1:])
+  args = preprocessArgs(sys.argv[1:])
+  args, badArgs = parser.parse_known_args(args)
 
   if len(badArgs) > 0:
     printBadArgsError(badArgs)

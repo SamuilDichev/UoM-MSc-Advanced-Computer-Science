@@ -374,6 +374,16 @@ b''
 ... except subprocess.CalledProcessError as e:
 ...   e.output
 b"wc: unrecognised option '--z'\\nTry 'wc --help' for more information.\\n"
+>>> try:
+...   subprocess.check_output("python3 wc.py testinputs/services -l testinputs/os-release 2>/dev/null", shell=True)
+... except subprocess.CalledProcessError as e:
+...   e.output
+b'\\t11176\\ttestinputs/services\\n\\t15\\ttestinputs/os-release\\n\\t11191\\ttotal\\n'
+>>> try:
+...   subprocess.check_output("python3 wc.py testinputs/services -l testinputs/os-release 2>&1 >/dev/null", shell=True)
+... except subprocess.CalledProcessError as e:
+...   e.output
+b''
 """
 
 if __name__ == "__main__":
