@@ -7,17 +7,17 @@ class TestStringMethods(unittest.TestCase):
 
   def test_parser(self):
     from wc import createArgParser
-    from wc import preprocessArgs
 
     parser = createArgParser()
-    args = "txt1 -l txt2 --flag2 txt3 -- -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split()
-    args, badArgs = parser.parse_known_args(preprocessArgs(args))
+    preprocessedArgs = '-l --flag2 txt1 txt2 txt3 -- -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c'.split()
+    args, badArgs = parser.parse_known_args(preprocessedArgs)
 
     self.assertFalse(args.c)
     self.assertTrue(args.l)
     self.assertFalse(args.w)
 
     self.assertEqual(args.FILE, "txt1 txt2 txt3 -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split())
+    self.assertEqual(badArgs, "--flag2".split())
 
   def test_isFileArg(self):
     from wc import isFileArg
@@ -84,7 +84,7 @@ class TestStringMethods(unittest.TestCase):
     filepaths.append("/etc/passwd")
 
     # Extract stderr and stdout as variables, so we can compare results
-    with self.captured_output() as (stdout, stderr):
+    with self.capturedOutput() as (stdout, stderr):
       """
       Testing only good options (only valid) as this function doesn't actually handle options,
       it merely passes them onto the print function which is tested in another unit test
@@ -129,13 +129,13 @@ class TestStringMethods(unittest.TestCase):
   """
   def test_printBadArgsError(self):
     from wc import printBadArgsError
-    with self.captured_output() as (stdout, stderr):
+    with self.capturedOutput() as (stdout, stderr):
       printBadArgsError(["-z"])
 
     self.assertEqual("", stdout.getvalue())
     self.assertEqual("wc: invalid option -- 'z'\nTry 'wc --help' for more information.\n", stderr.getvalue())
 
-    with self.captured_output() as (stdout, stderr):
+    with self.capturedOutput() as (stdout, stderr):
       printBadArgsError(["--z"])
 
     self.assertEqual("", stdout.getvalue())
@@ -193,7 +193,7 @@ class TestStringMethods(unittest.TestCase):
     from wc import eprint
 
     error = "this error should end up in stderr, not in stdout"
-    with self.captured_output() as (stdout, stderr):
+    with self.capturedOutput() as (stdout, stderr):
       eprint(error)
 
     self.assertEqual("", stdout.getvalue())
@@ -213,7 +213,7 @@ class TestStringMethods(unittest.TestCase):
   def assertOutput(self, lc, wrc, bc, file, options, expectedStdout):
     from wc import printOutput
 
-    with self.captured_output() as (stdout, stderr):
+    with self.capturedOutput() as (stdout, stderr):
       printOutput(lc, wrc, bc, file, options)
 
     self.assertEqual(stdout.getvalue(), expectedStdout)
@@ -251,7 +251,7 @@ class TestStringMethods(unittest.TestCase):
   Captures stdout and stderr, so they can be compared to expected output
   """
   @contextmanager
-  def captured_output(self):
+  def capturedOutput(self):
     my_stdout, my_stderr = StringIO(), StringIO()
     default_stdout, default_stderr = sys.stdout, sys.stderr
 
