@@ -6,8 +6,8 @@ from io import StringIO
 class TestStringMethods(unittest.TestCase):
 
   def test_parser(self):
-    from .wc import createArgParser
-    from .wc import preprocessArgs
+    from wc import createArgParser
+    from wc import preprocessArgs
 
     parser = createArgParser()
     args = "txt1 -l txt2 --flag2 txt3 -- -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split()
@@ -20,14 +20,14 @@ class TestStringMethods(unittest.TestCase):
     self.assertEqual(args.FILE, "txt1 txt2 txt3 -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split())
 
   def test_isFileArg(self):
-    from .wc import isFileArg
+    from wc import isFileArg
     self.assertFalse(isFileArg("-asasda"))
     self.assertFalse(isFileArg("-c"))
     self.assertTrue(isFileArg("--"))
     self.assertTrue(isFileArg("asdas"))
 
   def test_getOptions(self):
-    from .wc import getOptions
+    from wc import getOptions
     from argparse import Namespace
 
     namespace = Namespace(z=True, b=False, c=True, d=False, o=2, l="s")
@@ -43,7 +43,7 @@ class TestStringMethods(unittest.TestCase):
 
   def test_processFile(self):
     import os
-    from .wc import processFile
+    from wc import processFile
 
     # Get absolute path to "testinputs"
     testdir = os.path.join(os.path.dirname(__file__), "testinputs")
@@ -63,7 +63,7 @@ class TestStringMethods(unittest.TestCase):
 
   def test_processFiles(self):
     import os
-    from .wc import processFiles
+    from wc import processFiles
     import subprocess
 
     # Get absolute path to "testinputs"
@@ -107,7 +107,7 @@ class TestStringMethods(unittest.TestCase):
     self.assertEqual("".join(str(errors).split()), "".join(wcStderr.split()))
 
   def test_escapeIllegalSymbols(self):
-    from .wc import escapeIllegalSymbols
+    from wc import escapeIllegalSymbols
     illegalSymbols = [" ", "!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|"]
     exampleLegalSymbols = ["@", "%", "£", "€", "¥", "_"]
     legalString = "The_quick_brown_fox_jumps_over_the_lazy_dog"
@@ -128,7 +128,7 @@ class TestStringMethods(unittest.TestCase):
   with a double hyphen '--' or a single one '-'
   """
   def test_printBadArgsError(self):
-    from .wc import printBadArgsError
+    from wc import printBadArgsError
     with self.captured_output() as (stdout, stderr):
       printBadArgsError(["-z"])
 
@@ -190,7 +190,7 @@ class TestStringMethods(unittest.TestCase):
   Tests that errors end up in stderr, not stdout
   """
   def test_eprint(self):
-    from .wc import eprint
+    from wc import eprint
 
     error = "this error should end up in stderr, not in stdout"
     with self.captured_output() as (stdout, stderr):
@@ -200,12 +200,10 @@ class TestStringMethods(unittest.TestCase):
     self.assertEqual("{}\n".format(error), stderr.getvalue())
 
   def test_preProcessArgs(self):
-    from .wc import preprocessArgs
+    from wc import preprocessArgs
     args = "txt1 -l txt2 --flag2 txt3 -- -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split()
     expectedArgs = "-l --flag2 txt1 txt2 txt3 -- -w txt4 -- --w txt5 -- txt6 - txt7 -- - txt8 -c".split()
     newArgs = preprocessArgs(args)
-
-    self.maxDiff=None
 
     self.assertEqual(newArgs, expectedArgs)
 
@@ -213,7 +211,7 @@ class TestStringMethods(unittest.TestCase):
   Helper for printOutput test. Does the actual assertions.
   """
   def assertOutput(self, lc, wrc, bc, file, options, expectedStdout):
-    from .wc import printOutput
+    from wc import printOutput
 
     with self.captured_output() as (stdout, stderr):
       printOutput(lc, wrc, bc, file, options)
