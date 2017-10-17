@@ -275,4 +275,4 @@ class TestStringMethods(unittest.TestCase):
     return output
 
 if __name__ == '__main__':
-    unittest.main()
+  unittest.main()
