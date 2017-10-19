@@ -1,25 +1,33 @@
 import sys
 import argparse
+import time
 
 FNF_ERR = "wc: {}: No such file or directory"
 ZERO_LENGTH_FILE = "wc: invalid zero-length file name"
-DIR_ERR = "wc: {}: Is a directory"
-PERMISSION_ERROR = "wc: {}: Permission denied"
-LONG_OPT_ERR = "wc: unrecognised option '{}'\nTry 'wc --help' for more information."
-SHORT_OPT_ERR = "wc: invalid option -- '{}'\nTry 'wc --help' for more information."
+DIR_ERR = "wc: %s: Is a directory"
+PERMISSION_ERROR = "wc: %s: Permission denied"
+LONG_OPT_ERR = "wc: unrecognised option '%s'\nTry 'wc --help' for more information."
+SHORT_OPT_ERR = "wc: invalid option -- '%s'\nTry 'wc --help' for more information."
 ALLOWED_OPTIONS = ["l", "w", "c"]
+TIMES = []
 
 # WHAT THE FUCK, wc?
 ESCAPED_SYMBOLS = [" ", "!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|"]
 
 def processFile(filepath):
-  linecount, wordcount, bytecount = 0, 0, 0
-
+  start = time.time()
   with open(filepath, 'rb') as f:
-    for line in f:
-      linecount += line.count(b'\n')
-      wordcount += len(line.split())
-      bytecount += len(line)
+    # for line in f:
+    #   linecount += line.count(b'\n')
+    #   wordcount += len(line.split())
+    #   bytecount += len(line)
+    file = f.read()
+    linecount = file.count(b'\n')
+    wordcount = len(file.split())
+    bytecount = len(file)
+
+  end = time.time()
+  TIMES.append("Time for processFile: %s" % end - start)
 
   return linecount, wordcount, bytecount, filepath
 
@@ -36,38 +44,51 @@ def processFiles(filepaths, options):
 
       printOutput(lc, wc, bc, filepath, options)
     except FileNotFoundError:
-      eprint(FNF_ERR.format(escapeIllegalSymbols(filepath)))
+      eprint(FNF_ERR % escapeIllegalSymbols(filepath))
     except IsADirectoryError:
-      eprint(DIR_ERR.format(escapeIllegalSymbols(filepath)))
+      eprint(DIR_ERR % escapeIllegalSymbols(filepath))
       printOutput(0, 0, 0, filepath, options)
     except PermissionError:
-      eprint(PERMISSION_ERROR.format(escapeIllegalSymbols(filepath)))
+      eprint(PERMISSION_ERROR % escapeIllegalSymbols(filepath))
 
   if len(filepaths) > 1:
     printOutput(totalLC, totalWC, totalBC, "total", options)
 
 def escapeIllegalSymbols(string):
+  start = time.time()
   for c in string:
     if str(c) in ESCAPED_SYMBOLS:
-      return "'{}'".format(string)
+      return "'%s'" % string
+
+  end = time.time()
+  TIMES.append("Time for escapeIllegalSymbols: %s" % end - start)
 
   return string
 
 def createArgParser():
+  start = time.time()
   parser = argparse.ArgumentParser(add_help=False)
 
   for option in ALLOWED_OPTIONS:
-    parser.add_argument("-{}".format(option), "--{}".format(option), action="store_true")
+    parser.add_argument("-%s"% option, "--%s" % option, action="store_true")
 
   parser.add_argument("FILE", nargs="*")
+
+  end = time.time()
+  TIMES.append("Time for createArgParser: %s" % end - start)
 
   return parser
 
 def getOptions(namespace):
+  start = time.time()
+
   options = []
   for arg,v in vars(namespace).items():
     if v == True:
       options.append(arg)
+
+  end = time.time()
+  TIMES.append("Time for getOptions: %s" % end - start)
 
   return options
 
@@ -77,32 +98,40 @@ Does not do any checking if the arguments are actually bad, simply formats the e
 correctly according to the type / length of the arguments.
 """
 def printBadArgsError(args):
+  start = time.time()
   if str(args[0]).startswith("--"):
-    eprint(LONG_OPT_ERR.format(args[0]))
+    eprint(LONG_OPT_ERR % args[0])
   else:
-    eprint(SHORT_OPT_ERR.format(args[0][1:]))
+    eprint(SHORT_OPT_ERR % args[0][1:])
+  end = time.time()
+  TIMES.append("Time for printBadArgsError: %s" % end - start)
 
 def printOutput(lc, wc, bc, last, options):
+  start = time.time()
   output = ""
   options = [o for o in options if o in ALLOWED_OPTIONS]
 
   if ALLOWED_OPTIONS[0] in options or len(options) == 0:
-    output += "\t{}".format(lc)
+    output += "\t%s" % lc
   if ALLOWED_OPTIONS[1] in options or len(options) == 0:
-    output += "\t{}".format(wc)
+    output += "\t%s" % wc
   if ALLOWED_OPTIONS[2] in options or len(options) == 0:
-    output += "\t{}".format(bc)
+    output += "\t%s" % bc
 
-  output += "\t{}".format(last)
+  output += "\t%s" % last
 
   print(output)
+  end = time.time()
+  TIMES.append("Time for printOutput: %s" % end - start)
 
 def eprint(*args, **kwargs):
+  start = time.time()
   print(*args, file=sys.stderr, **kwargs)
+  end = time.time()
+  TIMES.append("Time for eprint: %s" % end - start)
 
 def preprocessArgs(args):
-  flags = []
-  files = []
+  flags, files = [], []
   onlyFilesLeft = False
   for arg in args:
     if str(arg) == "--":
@@ -129,7 +158,7 @@ if __name__ == "__main__":
 
   # TODO Which error? Invalid zero-length or no such file?
   if len(sys.argv) < 2:
-    eprint(FNF_ERR.format(""))
+    eprint(FNF_ERR % "")
     sys.exit(1)
   else:
     processFiles(args.FILE, getOptions(args))
