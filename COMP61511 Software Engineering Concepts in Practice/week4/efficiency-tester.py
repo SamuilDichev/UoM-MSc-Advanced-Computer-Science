@@ -25,8 +25,10 @@ def getSeconds(timeString):
 
 def outputResults(results):
   print("Testcase\tReal\tCPU")
-  for result in results:
-    print("{}\t{}\t{}".format(result[0], result[1], result[2]))
+  for file, real, cpu in results:
+    print("{}\t{}\t{}".format(file, real, cpu))
+
+# TODO create calculateStats(results)
 
 def createArgParser():
   parser = argparse.ArgumentParser(add_help=True)
