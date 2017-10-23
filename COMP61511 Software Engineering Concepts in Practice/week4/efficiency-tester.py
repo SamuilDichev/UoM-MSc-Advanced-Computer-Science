@@ -3,6 +3,7 @@ import sys
 import argparse
 import glob
 import subprocess
+import statistics
 
 def processFile(program, fpath):
   # TODO Quote path manually if taken from args, otherwise it tries to pass it unquoted and breaks
@@ -28,7 +29,31 @@ def outputResults(results):
   for file, real, cpu in results:
     print("{}\t{}\t{}".format(file, real, cpu))
 
-# TODO create calculateStats(results)
+def calculateStats(results):
+  realResults = []
+  cpuResults = []
+
+  for file, real, cpu in results:
+    realResults.append(real)
+    cpuResults.append(cpu)
+
+  results = {}
+  results["avgReal"] = sum(realResults) / len(realResults)
+  results["minReal"] = min(realResults)
+  results["maxReal"] = max(realResults)
+  results["medianReal"] = statistics.median(realResults)
+
+  results["avgCpu"] = sum(cpuResults) / len(cpuResults)
+  results["minCpu"] = min(cpuResults)
+  results["maxCpu"] = max(cpuResults)
+  results["medianCpu"] = statistics.median(cpuResults)
+
+  return results
+
+def printReport(wcRes, wcPyRes):
+  print("\tAverage\tMin\tMax\tMedian")
+  print("{}\t{}\t{}\t{}\t{}".format("wc", wcRes.get("avgReal"), wcRes.get("minReal"), wcRes.get("maxReal"), wcRes.get("medianReal")))
+  print("{}\t{}\t{}\t{}\t{}".format("wc.py", wcPyRes.get("avgReal"), wcPyRes.get("minReal"), wcPyRes.get("maxReal"), wcPyRes.get("medianReal")))
 
 def createArgParser():
   parser = argparse.ArgumentParser(add_help=True)
@@ -42,3 +67,7 @@ if __name__ == "__main__":
   wcPyOut = processFiles("python3 wc.py", args.directory)
 
   outputResults(wcOut)
+  print()
+  outputResults(wcPyOut)
+  print()
+  printReport(calculateStats(wcOut), calculateStats(wcPyOut))
