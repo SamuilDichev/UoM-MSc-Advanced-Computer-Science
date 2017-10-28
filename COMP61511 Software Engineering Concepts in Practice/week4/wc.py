@@ -7,9 +7,12 @@ DIR_ERR = "wc: {}: Is a directory"
 PERMISSION_ERROR = "wc: {}: Permission denied"
 LONG_OPT_ERR = "wc: unrecognised option '{}'\nTry 'wc --help' for more information."
 SHORT_OPT_ERR = "wc: invalid option -- '{}'\nTry 'wc --help' for more information."
+EXTRA_OP_ERR = """wc: extra operand '%s'
+file operands cannot be combined with --files0-from
+Try 'wc --help' for more information."""
 
 # WHAT THE FUCK, wc?
-ESCAPED_SYMBOLS = [" ", "!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|"]
+ESCAPED_SYMBOLS = [" ", "!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|", "\\n"]
 
 def processFile(filepath):
   linecount, wordcount, bytecount, maxlc = 0, 0, 0, 0
@@ -52,8 +55,10 @@ def processFiles(filepaths, options):
     printOutput(totals, options)
 
 def escapeIllegalSymbols(string):
-  for c in string:
-    if str(c) in ESCAPED_SYMBOLS:
+  string = string.replace("\n", "\\n")
+
+  for s in ESCAPED_SYMBOLS:
+    if string.__contains__(s):
       return "'{}'".format(string)
 
   return string
@@ -66,8 +71,9 @@ def createArgParser():
   parser.add_argument("-c", "--c", "--bytes", action="store_true", dest="c")
   parser.add_argument("-m", "--m", "--chars", action="store_true", dest="m")
   parser.add_argument("-L", "--max-line-length", action="store_true", dest="L")
-  parser.add_argument("--help", action="store_true", dest="help")
+  parser.add_argument("--h", "--help", action="store_true", dest="help")
   parser.add_argument("--version", action="store_true", dest="version")
+  parser.add_argument("--f", "--files0-from", action="store", dest="f")
 
   parser.add_argument("FILE", nargs="*")
 
@@ -167,6 +173,36 @@ There is NO WARRANTY, to the extent permitted by law.
 
 Written by Paul Rubin and David MacKenzie.""")
 
+def getFilesFrom0(filepath):
+  with open(filepath, 'rb') as f:
+    files = f.read().split(b'\x00')
+
+  newFiles = []
+  for file in files:
+    file = escapeNewLine(file.decode())
+    newFiles.append(file)
+
+  return newFiles
+
+def escapeNewLine(file):
+  prevN = False
+
+  newCharList = []
+  isPrevLF = False
+  for i in range(0, len(file)):
+    if file[i] == "\n" and isPrevLF == False:
+        newCharList.append("'$'")
+        newCharList.append(file[i])
+        if i != len(file) -1:
+          newCharList.append("''")
+
+        isPrevLF = True
+    else:
+      isPrevLF = False
+      newCharList.append(file[i])
+
+  return ''.join(newCharList)
+
 if __name__ == "__main__":
   parser = createArgParser()
   args = preprocessArgs(sys.argv[1:])
@@ -176,17 +212,29 @@ if __name__ == "__main__":
     printBadArgsError(badArgs)
     sys.exit(1)
 
+  # TODO add behavior if file args are added in addition to --f to print new error
   for arg in sys.argv[1:]:
-    if arg == "--help":
+    if arg == "--help" or arg == "--h":
       printHelp()
       sys.exit(0)
-    elif arg == "--version":
+    elif arg == "--version" or arg == "--v":
       printVersion()
       sys.exit(0)
+
+  files = args.FILE
+  if args.f and len(args.FILE) == 0:
+    files = getFilesFrom0(args.f)
+  elif args.f and len(args.FILE) > 0:
+    eprint(EXTRA_OP_ERR % args.FILE[0])
+    sys.exit(1)
+
+  # TODO Count characters by split.('') maybe?
+
+  # TODO --v might need to change version number to same as Linux labs
 
   # TODO Which error? Invalid zero-length or no such file?
   if len(sys.argv) < 2:
     eprint(FNF_ERR.format(""))
     sys.exit(1)
   else:
-    processFiles(args.FILE, getOptions(args))
+    processFiles(files, getOptions(args))
