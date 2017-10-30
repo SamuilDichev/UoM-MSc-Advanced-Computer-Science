@@ -2,8 +2,10 @@ import sys
 import argparse
 
 FNF_ERR = "wc: {}: No such file or directory"
+FNF_ERR2 = "wc: cannot open '{}' for reading: No such file or directory"
 ZERO_LENGTH_FILE = "wc: invalid zero-length file name"
 DIR_ERR = "wc: {}: Is a directory"
+NOT_DIR_ERR = "wc: {}: Not a directory"
 PERMISSION_ERROR = "wc: {}: Permission denied"
 LONG_OPT_ERR = "wc: unrecognised option '{}'\nTry 'wc --help' for more information."
 SHORT_OPT_ERR = "wc: invalid option -- '{}'\nTry 'wc --help' for more information."
@@ -15,22 +17,39 @@ Try 'wc --help' for more information."""
 ESCAPED_SYMBOLS = [" ", "!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|", "\\n"]
 
 def processFile(filepath):
-  linecount, wordcount, bytecount, maxlc = 0, 0, 0, 0
+  linecount, wordcount, charcount, bytecount, maxlc = 0, 0, 0, 0, 0
 
-  with open(filepath, 'rb') as f:
-    for line in f:
-      linecount += line.count(b'\n')
-      wordcount += len(line.split())
-      bytecount += len(line)
+  lfChar = b'\n'
+  if filepath == "-" or filepath == None:
+    f = sys.stdin
+    lfChar = '\n'
+    filepath = ""
+  elif filepath == "":
+    eprint(ZERO_LENGTH_FILE)
+    raise NameError
+  else:
+    f = open(filepath, 'rb')
 
-      if len(line) > maxlc:
-        maxlc = len(line)
+  # with open(filepath, 'rb') as f:
+  for line in f:
+    linecount += line.count(lfChar)
+    wordcount += len(line.split())
+    try:
+      charcount += len(line.decode("utf8"))
+    except UnicodeDecodeError:
+      charcount += len(line)
 
-  return {"lc": linecount, "maxlc": maxlc, "wc": wordcount, "cc": bytecount, "bc": bytecount, "fp": filepath}
+    bytecount += len(line)
+
+    if len(line) > maxlc:
+      maxlc = len(line)
+
+  f.close()
+
+  return {"lc": linecount, "maxlc": maxlc, "wc": wordcount, "cc": charcount, "bc": bytecount, "fp": filepath}
 
 def processFiles(filepaths, options):
   totals = {"lc": 0, "maxlc": 0, "wc": 0, "cc": 0, "bc": 0, "fp": "total"}
-
   for filepath in filepaths:
     try:
       results = processFile(filepath)
@@ -50,6 +69,13 @@ def processFiles(filepaths, options):
       printOutput({"lc": 0, "wc": 0, "cc": 0, "bc": 0, "fp": filepath}, options)
     except PermissionError:
       eprint(PERMISSION_ERROR.format(escapeIllegalSymbols(filepath)))
+    except NotADirectoryError:
+      eprint(NOT_DIR_ERR.format(filepath))
+      sys.exit(1)
+    except NameError:
+      pass
+    except KeyboardInterrupt:
+      sys.exit(130)
 
   if len(filepaths) > 1:
     printOutput(totals, options)
@@ -185,8 +211,6 @@ def getFilesFrom0(filepath):
   return newFiles
 
 def escapeNewLine(file):
-  prevN = False
-
   newCharList = []
   isPrevLF = False
   for i in range(0, len(file)):
@@ -212,29 +236,27 @@ if __name__ == "__main__":
     printBadArgsError(badArgs)
     sys.exit(1)
 
-  # TODO add behavior if file args are added in addition to --f to print new error
   for arg in sys.argv[1:]:
     if arg == "--help" or arg == "--h":
       printHelp()
-      sys.exit(0)
+      sys.exit(0) #
     elif arg == "--version" or arg == "--v":
       printVersion()
-      sys.exit(0)
+      sys.exit(0) #
 
   files = args.FILE
   if args.f and len(args.FILE) == 0:
-    files = getFilesFrom0(args.f)
+    try:
+      files = getFilesFrom0(args.f)
+    except FileNotFoundError:
+      eprint(FNF_ERR2.format(args.f))
+      sys.exit(1)
   elif args.f and len(args.FILE) > 0:
     eprint(EXTRA_OP_ERR % args.FILE[0])
     sys.exit(1)
 
-  # TODO Count characters by split.('') maybe?
-
   # TODO --v might need to change version number to same as Linux labs
-
-  # TODO Which error? Invalid zero-length or no such file?
-  if len(sys.argv) < 2:
-    eprint(FNF_ERR.format(""))
-    sys.exit(1)
+  if len(files) == 0:
+    processFiles([None], getOptions(args))
   else:
     processFiles(files, getOptions(args))
