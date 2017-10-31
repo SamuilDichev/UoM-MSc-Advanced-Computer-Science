@@ -34,9 +34,10 @@ def processFile(filepath):
   for line in f:
     linecount += line.count(lfChar)
     wordcount += len(line.split())
+
     try:
       charcount += len(line.decode("utf8"))
-    except UnicodeDecodeError:
+    except (UnicodeDecodeError, AttributeError):
       charcount += len(line)
 
     bytecount += len(line)
