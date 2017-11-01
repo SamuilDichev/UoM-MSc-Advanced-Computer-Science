@@ -3,7 +3,6 @@ import sys
 import argparse
 import glob
 import subprocess
-import statistics
 
 def processFile(program, fpath):
   # TODO Quote path manually if taken from args, otherwise it tries to pass it unquoted and breaks
@@ -41,19 +40,28 @@ def calculateStats(results):
   results["avgReal"] = sum(realResults) / len(realResults)
   results["minReal"] = min(realResults)
   results["maxReal"] = max(realResults)
-  results["medianReal"] = statistics.median(realResults)
+  results["medianReal"] = getMedian(realResults)
 
   results["avgCpu"] = sum(cpuResults) / len(cpuResults)
   results["minCpu"] = min(cpuResults)
   results["maxCpu"] = max(cpuResults)
-  results["medianCpu"] = statistics.median(cpuResults)
+  results["medianCpu"] = getMedian(cpuResults)
 
   return results
+
+def getMedian(lst):
+  even = (0 if len(lst) % 2 else 1) + 1
+  half = (len(lst) - 1) / 2
+  return sum(sorted(lst)[int(half):int(half) + even]) / float(even)
 
 def printReport(wcRes, wcPyRes):
   print("\tAverage\tMin\tMax\tMedian")
   print("{}\t{}\t{}\t{}\t{}".format("wc", wcRes.get("avgReal"), wcRes.get("minReal"), wcRes.get("maxReal"), wcRes.get("medianReal")))
   print("{}\t{}\t{}\t{}\t{}".format("wc.py", wcPyRes.get("avgReal"), wcPyRes.get("minReal"), wcPyRes.get("maxReal"), wcPyRes.get("medianReal")))
+  print()
+  print("\tAverage\tMin\tMax\tMedian")
+  print("{}\t{}\t{}\t{}\t{}".format("wc", wcRes.get("avgCpu"), wcRes.get("minCpu"), wcRes.get("maxCpu"), wcRes.get("medianCpu")))
+  print("{}\t{}\t{}\t{}\t{}".format("wc.py", wcPyRes.get("avgCpu"), wcPyRes.get("minCpu"), wcPyRes.get("maxCpu"), wcPyRes.get("medianCpu")))
 
 def createArgParser():
   parser = argparse.ArgumentParser(add_help=True)
