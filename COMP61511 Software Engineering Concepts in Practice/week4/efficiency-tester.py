@@ -9,13 +9,16 @@ def processFile(program, fpath):
   out = subprocess.check_output("(bash -c 'time {} {}') 2>&1".format(program, fpath), shell=True).decode().split("\n")[2:5]
   real = getSeconds(out[0].split("\t")[1])
   cpu = getSeconds(out[1].split("\t")[1]) + getSeconds(out[2].split("\t")[1])
-  return os.path.basename(fpath), real, cpu
+  return os.path.basename(fpath), float("{0:.4f}".format(real)), float("{0:.4f}".format(cpu))
 
 def processFiles(program, dir):
   fpaths = glob.glob(os.path.join(dir, "*"))
   results = []
   for fpath in fpaths:
-    results.append(processFile(program, fpath))
+    try:
+      results.append(processFile(program, fpath))
+    except subprocess.CalledProcessError:
+      pass
 
   return results
 
@@ -37,15 +40,15 @@ def calculateStats(results):
     cpuResults.append(cpu)
 
   results = {}
-  results["avgReal"] = sum(realResults) / len(realResults)
-  results["minReal"] = min(realResults)
-  results["maxReal"] = max(realResults)
-  results["medianReal"] = getMedian(realResults)
+  results["avgReal"] = float("{0:.4f}".format(sum(realResults) / len(realResults)))
+  results["minReal"] = float("{0:.4f}".format(min(realResults)))
+  results["maxReal"] = float("{0:.4f}".format(max(realResults)))
+  results["medianReal"] = float("{0:.4f}".format(getMedian(realResults)))
 
-  results["avgCpu"] = sum(cpuResults) / len(cpuResults)
-  results["minCpu"] = min(cpuResults)
-  results["maxCpu"] = max(cpuResults)
-  results["medianCpu"] = getMedian(cpuResults)
+  results["avgCpu"] = float("{0:.4f}".format(sum(cpuResults) / len(cpuResults)))
+  results["minCpu"] = float("{0:.4f}".format(min(cpuResults)))
+  results["maxCpu"] = float("{0:.4f}".format(max(cpuResults)))
+  results["medianCpu"] = float("{0:.4f}".format(getMedian(cpuResults)))
 
   return results
 
