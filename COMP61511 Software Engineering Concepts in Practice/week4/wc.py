@@ -14,7 +14,7 @@ file operands cannot be combined with --files0-from
 Try 'wc --help' for more information."""
 
 # WHAT THE FUCK, wc?
-ESCAPED_SYMBOLS = [" ", "!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|", "\\n"]
+ESCAPED_SYMBOLS = [" ", "!", "~", "#", "$", "^", "&", "*", "(", ")", "=", "<", ">", "?", ";", ":", "[", "{", "]", "}", "|"]
 
 def processFile(filepath):
   linecount, wordcount, charcount, bytecount, maxlc = 0, 0, 0, 0, 0
@@ -30,7 +30,6 @@ def processFile(filepath):
   else:
     f = open(filepath, 'rb')
 
-  # with open(filepath, 'rb') as f:
   for line in f:
     linecount += line.count(lfChar)
     wordcount += len(line.split())
@@ -82,8 +81,6 @@ def processFiles(filepaths, options):
     printOutput(totals, options)
 
 def escapeIllegalSymbols(string):
-  string = string.replace("\n", "\\n")
-
   for s in ESCAPED_SYMBOLS:
     if string.__contains__(s):
       return "'{}'".format(string)
@@ -169,11 +166,9 @@ def printHelp():
   print("""Usage: wc [OPTION]... [FILE]...
   or:  wc [OPTION]... --files0-from=F
 Print newline, word, and byte counts for each FILE, and a total line if
-more than one FILE is specified.  A word is a non-zero-length sequence of
-characters delimited by white space.
-
-With no FILE, or when FILE is -, read standard input.
-
+more than one FILE is specified.  With no FILE, or when FILE is -,
+read standard input.  A word is a non-zero-length sequence of characters
+delimited by white space.
 The options below may be used to select which counts are printed, always in
 the following order: newline, word, character, byte, maximum line length.
   -c, --bytes            print the byte counts
@@ -182,18 +177,17 @@ the following order: newline, word, character, byte, maximum line length.
       --files0-from=F    read input from the files specified by
                            NUL-terminated names in file F;
                            If F is - then read names from standard input
-  -L, --max-line-length  print the maximum display width
+  -L, --max-line-length  print the length of the longest line
   -w, --words            print the word counts
       --help     display this help and exit
       --version  output version information and exit
 
 GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
-Full documentation at: <http://www.gnu.org/software/coreutils/wc>
-or available locally via: info '(coreutils) wc invocation'""")
+For complete documentation, run: info coreutils 'wc invocation'""")
 
 def printVersion():
-  print("""wc (GNU coreutils) 8.25
-Copyright (C) 2016 Free Software Foundation, Inc.
+  print("""wc (GNU coreutils) 8.22
+Copyright (C) 2013 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
@@ -206,27 +200,10 @@ def getFilesFrom0(filepath):
 
   newFiles = []
   for file in files:
-    file = escapeNewLine(file.decode())
+    file = file.decode()
     newFiles.append(file)
 
   return newFiles
-
-def escapeNewLine(file):
-  newCharList = []
-  isPrevLF = False
-  for i in range(0, len(file)):
-    if file[i] == "\n" and isPrevLF == False:
-        newCharList.append("'$'")
-        newCharList.append(file[i])
-        if i != len(file) -1:
-          newCharList.append("''")
-
-        isPrevLF = True
-    else:
-      isPrevLF = False
-      newCharList.append(file[i])
-
-  return ''.join(newCharList)
 
 if __name__ == "__main__":
   parser = createArgParser()
@@ -240,10 +217,10 @@ if __name__ == "__main__":
   for arg in sys.argv[1:]:
     if arg == "--help" or arg == "--h":
       printHelp()
-      sys.exit(0) #
+      sys.exit(0)
     elif arg == "--version" or arg == "--v":
       printVersion()
-      sys.exit(0) #
+      sys.exit(0)
 
   files = args.FILE
   if args.f and len(args.FILE) == 0:
@@ -256,7 +233,6 @@ if __name__ == "__main__":
     eprint(EXTRA_OP_ERR % args.FILE[0])
     sys.exit(1)
 
-  # TODO --v might need to change version number to same as Linux labs
   if len(files) == 0:
     processFiles([None], getOptions(args))
   else:
