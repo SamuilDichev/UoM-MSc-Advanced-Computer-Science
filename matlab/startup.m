@@ -1,7 +1,12 @@
 
 prefix = pwd;
 
+[parentdir,~,~] = fileparts(pwd);
+
 addpath(prefix);
+addpath(parentdir);
+addpath(genpath(fullfile(parentdir, 'COMP61021')));
+
 addpath([ prefix '/MLOtools']);
 addpath([ prefix '/MLOtools/External']);
 addpath([ prefix '/MLOtools/External/libsvm']);
