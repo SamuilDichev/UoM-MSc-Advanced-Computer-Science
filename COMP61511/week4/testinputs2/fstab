@@ -1,0 +1,20 @@
+
+#
+# /etc/fstab
+# Created by anaconda on Fri Sep  9 12:13:41 2016
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk'
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info
+#
+UUID=c1b38923-84a8-462c-8346-a1e200e9cbad /                       ext4    defaults        1 1
+UUID=2cb5d29a-87d5-49f7-ba45-82b8935ccd75 /boot                   ext4    defaults        1 2
+# following line changed by kickstart Fri Sep  9 13:27:55 BST 2016
+UUID=e438aaa6-086e-4ff2-b592-613617053f03 /home                   ext4    nodev,nosuid,nogrpid        1 2
+# following line changed by kickstart Fri Sep  9 13:27:55 BST 2016
+UUID=ebca93ea-8a6d-4d7e-bced-8dd1004dfca3 /tmp                    ext4    nodev,nosuid,nogrpid        1 2
+UUID=ef6813df-982d-47ea-ac32-1cf79b4c8b9d /var                    ext4    defaults        1 2
+UUID=d4e53936-ee9b-46c9-a9b2-0257e05b9479 swap                    swap    defaults        0 0
+#CS_fstab-1.0-5
+devon.cs.man.ac.uk:/home/netopt      /netopt              nfs     ro,nodev,nosuid              0 0
+cadmaster.cs.man.ac.uk:/data/cadtools5      /cadtools5              nfs     ro,nodev,nosuid              0 0
+#CS_fstab-1.0-5

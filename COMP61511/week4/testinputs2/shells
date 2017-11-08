@@ -1,0 +1,13 @@
+/bin/sh
+/bin/bash
+/sbin/nologin
+/usr/bin/sh
+/usr/bin/bash
+/usr/sbin/nologin
+/bin/ksh
+/bin/rksh
+/bin/zsh
+/bin/tcsh
+/bin/csh
+/usr/bin/fish
+/usr/bin/tmux

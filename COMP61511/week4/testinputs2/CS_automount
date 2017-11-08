@@ -1,0 +1,3 @@
+#CS_automount-7.0-1
+*      -fstype=nfs,nfsvers=3,rw,soft,intr,nosuid,nodev      studentc.cs.man.ac.uk,studentd.cs.man.ac.uk,studente.cs.man.ac.uk,studentf.cs.man.ac.uk:/export/home/&
+#CS_automount-7.0-1

@@ -1,0 +1,15 @@
+#
+# hosts.allow	This file contains access rules which are used to
+#		allow or deny connections to network services that
+#		either use the tcp_wrappers library or that have been
+#		started through a tcp_wrappers-enabled xinetd.
+#
+#		See 'man 5 hosts_options' and 'man 5 hosts_access'
+#		for information on rule syntax.
+#		See 'man tcpd' for information on tcp_wrappers
+#
+# lines added by kickstart Fri Sep  9 13:27:55 BST 2016
+ALL: 127.0.0.1
+# end of lines added by kickstart
+nrpe: 130.88.203.32, 130.88.16.1, 130.88.16.28
+# Modified by nagios-config
