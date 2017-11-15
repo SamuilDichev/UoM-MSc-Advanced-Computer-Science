@@ -1,0 +1,5 @@
+PCs are essentially vectors which define a vector space, i.e. the space where points reside.
+
+On a 2D space, the X and Y axises would normally be these vectors which define the vector space. But PCs essentially point in the directions of the least covariance (Or something like that). 
+
+To visualise it, imagine points in a graph, which stretch in a particular direction. The first PC might be in that direction. If I understand correctly, whether a PC is first or second depends on the covariance. Sot it's kinda of like ranking.
