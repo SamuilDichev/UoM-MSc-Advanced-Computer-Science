@@ -1,6 +1,8 @@
 load iris;
 allPCs = pca1(X);
 pcs = zeros(4, 2);
+
+% Choose PCs
 pcs(:, 1) = allPCs(:, 1);
 pcs(:, 2) = allPCs(:, 2);
 
