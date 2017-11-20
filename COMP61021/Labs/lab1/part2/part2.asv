@@ -28,7 +28,7 @@ for i = 1: size(test, 2);
 end
 
 % Choose # of PCs to use
-for i = 1: 784;
+for i = 1: 50;
     pcs(:, i) = allPCs(:, i);
 end
 
@@ -40,6 +40,8 @@ for i = 1: size(X, 2);
     z = pcs' * ( x -  xmean);
     cX(:, i) = z;
 end
+
+
 
 % Convert column vectors back into matrices
 % dX - decompressed X, i.e. decompressed test data
