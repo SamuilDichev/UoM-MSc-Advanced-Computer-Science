@@ -62,8 +62,9 @@ This condition is first satisfied at 47 principal components with $PoV = 90.05\%
   \label{fig:fig4}
 \end{figure}
 
-At 47 principal components, we also observe a good size compression on disk. After using matlab's save function to save each dataset on disk separately, I established that the default uncompressed test dataset is of size 4985 bytes, while the compressed version of the test dataset is only 3837 bytes, which is a size compression of roughly 23.03\%.
-\\\\Each datapoint is compressed via $z = U^{T}_{M}(x - \vv{x})$ and is then reconstructed via $x' = \vv{x} + U_{M}z$
+At 47 principal components, we also observe good size compression on disk. After being saved on disk, the default uncompressed test dataset takes 4985 bytes, while the compressed version is only 3837 bytes, which is a size compression of roughly 23.03\%.
+\\\\Each datapoint is compressed via $z = U^{T}_{M}(x - \vv{x})$ and is then reconstructed via $x' = \vv{x} + U_{M}z$.
+Finally, the reconstruction error is calculated by summing the unused components' eigenvalues $E = \sum_{i=M+1^{\lambda_{i}}}^{d}$, which results in $E = 3.9419$.
 \\\\On Figure \ref{fig:fig5} we can see the original test dataset images, before any compression and on Figure \ref{fig:fig6} we can see the same images after reconstruction using 47 PCs.
 \\\\On Figure \ref{fig:fig7} we see the reconstructed images. The left column contains the images compressed and reconstructed using 1 to 25 PCs and the right column shows the images made with PCs between 26 and 50.\\\\ 
 

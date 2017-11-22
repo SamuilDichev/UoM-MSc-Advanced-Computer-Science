@@ -1,4 +1,4 @@
-function dX = part2(train, test, numPCs)
+function [dX, V, nPCs, PoV, E] = part2(train, test, numPCs)
 imgDim = 28;
 
 % Convert matrices into column vectors
@@ -27,7 +27,7 @@ for i = 1: size(test, 2);
 end
 
 % Choose # of PCs to use
-[nPCs, PoV] = getDimensionality(V);
+[nPCs, PoV, E] = getDimensionality(V);
 for i = 1: numPCs;
     pcs(:, i) = allPCs(:, i);
 end
