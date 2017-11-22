@@ -1,5 +1,4 @@
-load digit;
-
+function dX = part2(train, test, numPCs)
 imgDim = 28;
 
 % Convert matrices into column vectors
@@ -14,7 +13,7 @@ for i = 1: size(train, 2);
 end
 
 % Get PCs of train data
-allPCs = pca2(newTrain);
+[allPCs, V] = pca2(newTrain);
 
 % Set X to test data
 X = [];
@@ -28,7 +27,8 @@ for i = 1: size(test, 2);
 end
 
 % Choose # of PCs to use
-for i = 1: 784;
+[nPCs, PoV] = getDimensionality(V);
+for i = 1: numPCs;
     pcs(:, i) = allPCs(:, i);
 end
 
@@ -46,7 +46,7 @@ end
 dX = {};
 for i = 1: size(cX, 2);
     img = [];
-        
+
     % rx - reconstructed x
     rx = xmean + pcs * cX(:, i);
     for row = 1: imgDim; 
@@ -54,6 +54,8 @@ for i = 1: size(cX, 2);
             img(row, col) = rx((row - 1) * imgDim + col, 1);
         end
     end
-    
+
     dX{1, i} = img; 
+end
+
 end
