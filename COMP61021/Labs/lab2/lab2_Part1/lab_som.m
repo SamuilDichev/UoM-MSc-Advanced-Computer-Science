@@ -49,7 +49,12 @@ for i = 1: trainingSteps
     
     for j = 1: size(som, 1)
         % get distance of neuron to the BMU
-        distToBMU = norm(som(bmuIdx, :) - som(j, :));
+        % distToBMU = norm(som(bmuIdx, :) - som(j, :));
+        if bmuIdx > j
+            distToBMU = bmuIdx - j;
+        else
+            distToBMU = j - bmuIdx;
+        end
         
         % if neuron is within the neighbourhood, adjust weight
         if distToBMU < radius
@@ -73,31 +78,10 @@ for i = 1: trainingSteps
     end
     
     % Decrease learning rate
-    learningRate = startLearningRate * exp(-(i/1000));
+    learningRate = startLearningRate * exp(-(i/trainingSteps));
     
     % Decrement neighbourhood size
     radius = startRadius * exp(-(i/trainingSteps));
     
     % hold off;
 end
-
-% TODO:
-% The student will need to complete this function so that it returns
-% a matrix 'som' containing the weights of the trained SOM.
-% The weight matrix should be arranged as follows, where
-% N is the number of features and M is the number of neurons:
-%
-% Neuron1_Weight1 Neuron1_Weight2 ... Neuron1_WeightN
-% Neuron2_Weight1 Neuron2_Weight2 ... Neuron2_WeightN
-% ...
-% NeuronM_Weight1 NeuronM_Weight2 ... NeuronM_WeightN
-%
-% It is important that this format is maintained as it is what
-% lab_vis(...) expects.
-%
-% Some points that you need to consider are:
-%   - How should you randomise the weight matrix at the start?
-%   - How do you decay both the learning rate and radius over time?
-%   - How does updating the weights of a neuron effect those nearby?
-%   - How do you calculate the distance of two neurons when they are
-%     arranged on a single line?
