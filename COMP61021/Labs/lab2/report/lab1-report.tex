@@ -35,40 +35,40 @@ Finally, both the learning rate and neighbourhood size (or radius) are decreased
 
 where $t$ is the current iteration (or time step) and $\tau_1$ and $\tau_2$ are parameters, which may be worth configuring for best results. In my implementation $\tau_1 = \tau_2 = trainingSteps$
 
-Finally, we can see the results in Figures \ref{fig:1d} and \ref{fig:2d}. In both cases, the neurons closely follow the shape of the ring. We can also observe a gap between the first and last neuron in both the chain and the lattice. This is likely due to the fact that we are using Manhattan distance to calculate closeness. If a data point is selected at random during the algorithm training, which happens to be located right in that gap and one of the neurons at either end of the chain or lattice becomes the BMU (winner), upon the update of its neighbours, the neuron at the other end will not update despite it being physically close, because it's far in the lattice. This would be different if we used Euclidean distance to determine neighbours, but Manhattan distance only considers distance in the lattice, not physical distance as is visualized on the graph.
+Finally, we can see the results in Figures \ref{fig:1d} and \ref{fig:2d}. In both cases, the neurons closely follow the shape of the ring. We can see a gap between the first and last neuron in both the chain and the lattice. This is likely due to the fact that we are using Manhattan distance to calculate closeness. If a data point is selected at random during the algorithm training, which happens to be located right in that gap and one of the neurons at either end of the lattice becomes the BMU (winner), upon the update of its neighbours, the neuron at the other end will not update despite it being physically close, because it's far in the lattice. This would be different if we used Euclidean distance to determine neighbours, but Manhattan distance only considers distance in the lattice, not physical distance.
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=\linewidth/3*2]{figures/1d.png}
-  \caption{1D SOM chain of 25 neurons, trained for 15000 iterations using 0.1 learning rate and radius of 3.}
+  \includegraphics[width=0.8\linewidth]{figures/1d.png}
+  \caption{1D SOM - 25 neurons, iterations = 15000, learning rate = 0.1, radius = 3.}
   \label{fig:1d}
 \end{figure}
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=\linewidth/3*2]{figures/2d.png}
-  \caption{2D SOM lattice of 15x3 neurons, trained for 15000 iterations using 0.1 learning rate and radius of 3.}
+  \includegraphics[width=0.8\linewidth]{figures/2d.png}
+  \caption{2D SOM - 15x3 neurons. iterations = 15000, learning rate = 0.1, radius = 3.}
   \label{fig:2d}
 \end{figure}
 
 \section{Image clustering with SOM}
 
-After training the SOM with default parameters on the 172 images, I produced the U-matrix in Figure \ref{fig:u}. Unified distance matrices are used to represent high-dimensional data in a 2-dimensional image by visualizing the distances between neurons. This is useful because the distance between neurons is descriptive of the distance between data points, since the neurons' weight is influenced by the data points' locations. In a U-matrix, similar colors show clustering as they are indicative of closely related neurons, while different colors represent larger distance between neurons. 
+After training the SOM with default parameters, I produced Figure \ref{fig:u}. Unified distance matrices are used to represent high-dimensional data in a 2-dimensional image by visualizing the distances between neurons. This is useful because the distance between neurons is descriptive of the distance between data points, since the neurons' weight is influenced by the data points' locations. Similar colors show clustering as they are indicative of closely related neurons, while different colors represent larger distance between neurons. 
 
-Based on the U-matrix, the SOM is trained to find images which have a cluster of similar colors in the middle, which is indicative of an image with a single object in the middle. This is based on the color clustering in the middle of the matrix. With the default parameters, it works in some cases, but often finds images which do not have an object in the middle. Increasing the training steps a hundred fold for both rough and finetune training significantly improves the results when finding images with an object in the middle and produces the U-matrix in  Figure \ref{fig:u2}. Changing the map size resulted in no observable difference in accuracy. It added just as many similar images as it did random non-similar images. Unless, of course, the SOM has become better capable of detecting similarities than me, a human.
+Based on the U-matrix, the SOM is trained to find images which have a cluster of similar colors in the middle, which is indicative of an image with a single object in the middle. This is based on the color clustering in the middle of the matrix. With the default parameters, it works in some cases, but often finds images which do not have an object in the middle. Increasing the training steps a hundred fold for both rough and finetune training significantly improves the results and produces the U-matrix in  Figure \ref{fig:u2}. Changing the map size resulted in no observable difference in accuracy. It added just as many similar images as it did random non-similar images. Unless, of course, the SOM has become better capable of detecting similarities than me - a human.
 
 \begin{figure}[htbp]
 \begin{minipage}[t]{0.45\linewidth}
   \centering
   \includegraphics[width=\linewidth]{figures/U-matrix.png}
-  \caption{U-matrix (unified distance matrix) with default parameters.}
+  \caption{U-matrix with default parameters.}
   \label{fig:u}
 \end{minipage}%
     \hfill%
 \begin{minipage}[t]{0.45\linewidth}
   \centering
   \includegraphics[width=\linewidth]{figures/U-matrix2.png}
-  \caption{U-matrix (unified distance matrix) with 100x default training steps.}
+  \caption{U-matrix with 100x default training steps.}
   \label{fig:u2}
 \end{minipage} 
 \end{figure}
