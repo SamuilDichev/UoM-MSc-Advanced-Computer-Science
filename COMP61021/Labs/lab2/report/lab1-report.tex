@@ -1,7 +1,7 @@
 \documentclass[a4paper,11pt,twocolumn]{article}
 \usepackage{mathtools}
 \usepackage{esvect}
-
+\usepackage{hyperref}
 \usepackage{titling}
 
 \setlength{\droptitle}{-10em}
@@ -15,6 +15,7 @@
 \author{
   Samuil Dichev, mbaxtsd2\\
   \texttt{The University of Manchester}\\
+  \TextField{Lab Machine}\\
 }
 
 \begin{document}
@@ -22,7 +23,7 @@
 \maketitle
 
 \section{SOM Implementation}
-Implementation begins by randomizing the position of $N$ neurons. For1D SOM, they are arranged in a chain and the total amount is passed to the program. For 2D SOM, the total amount is equal to the $height * width$ of the lattice of neurons, which are given separately.
+Implementation begins by randomizing the position of $N$ neurons. For 1D SOM, they are arranged in a chain and the total amount is passed to the program. For 2D SOM, the total amount is equal to the $height * width$ of the lattice of neurons, which are given separately.
 
 For each iteration (or training step), the algorithm randomly selects a data point. In our case, the data is arranged in a ring as shown in Figures \ref{fig:1d} and \ref{fig:2d}. For the selected data point, the algorithm determines the closest neuron (The winner or the Best Matching Unit (BMU)) using the Euclidean norm \[d_e(w,x) = ||w - x|| = \sqrt{(w - x)^T(w-x)}\] where in our case $w$ is the neuron vector and $x$ is the data point vector.
 
